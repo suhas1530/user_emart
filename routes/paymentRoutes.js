@@ -1,3 +1,5 @@
+
+
 const express = require('express');
 const router = express.Router();
 const Razorpay = require('razorpay');
@@ -14,8 +16,11 @@ router.post('/create-order', authMiddleware, async (req, res) => {
   try {
     const { orderId, amount } = req.body;
 
+    // Ensure amount is an integer
+    const amountInPaise = Math.round(amount);
+
     const options = {
-      amount: amount, // amount in paise
+      amount: amountInPaise, // amount in paise (must be integer)
       currency: 'INR',
       receipt: orderId,
       payment_capture: 1,
@@ -25,12 +30,15 @@ router.post('/create-order', authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      amount: amount,
+      amount: amountInPaise,
       razorpayOrderId: razorpayOrder.id,
     });
   } catch (error) {
     console.error('Razorpay error:', error);
-    res.status(500).json({ message: 'Payment gateway error' });
+    res.status(500).json({ 
+      message: 'Payment gateway error',
+      error: error.error?.description || error.message 
+    });
   }
 });
 
@@ -48,7 +56,6 @@ router.post('/verify', async (req, res) => {
 
     if (expectedSignature === razorpay_signature) {
       // Payment successful
-      // Update order status in your database
       res.json({ success: true });
     } else {
       res.status(400).json({ success: false, message: 'Invalid signature' });
