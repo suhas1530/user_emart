@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -8,6 +9,8 @@ const authRoutes = require("./routes/authRoutes");
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const basketRoutes = require('./routes/BasketRoutes')
 
 
 const app = express();
@@ -15,6 +18,15 @@ const app = express();
 // ================= Middleware =================
 app.use(cors());
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+app.use(history());
+app.use(express.static(path.join(__dirname, "dist")));
+app.get("*", (req, res) => {
+ res.sendFile(path.join(__dirname, "dist", "index.html"));
+ });
 
 // ================= Database Connection =================
 const MONGO_URI =
@@ -37,6 +49,9 @@ app.use("/api/member", require("./routes/memberRoutes"));
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
+
+app.use('/api', basketRoutes);
 
 // ================= Basic Test Route =================
 app.get("/", (req, res) => {

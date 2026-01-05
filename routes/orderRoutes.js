@@ -166,51 +166,226 @@
 
 
 
+// const express = require('express');
+// const router = express.Router();
+// const authMiddleware = require('../middleware/authMiddleware');
+// const Order = require('../models/Order');
+
+// // Get user's orders
+// router.get('/myorders', authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.auth.userId || req.auth.memberId;
+//     const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+//     res.json(orders);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+// // Get order by ID
+// router.get('/:orderId', authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.auth.userId || req.auth.memberId;
+//     const { orderId } = req.params;
+    
+//     const order = await Order.findOne({ orderId, userId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+    
+//     res.json(order);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+// // Save address
+// router.put('/:orderId/address', authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.auth.userId || req.auth.memberId;
+//     const { orderId } = req.params;
+//     const addressData = req.body;
+    
+//     const order = await Order.findOne({ orderId, userId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+    
+//     order.address = addressData;
+//     order.status = 'availability_check';
+//     order.updatedAt = new Date();
+    
+//     await order.save();
+//     res.json({ message: 'Address saved', order });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+// // Check availability
+// router.post('/:orderId/check-availability', authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.auth.userId || req.auth.memberId;
+//     const { orderId } = req.params;
+    
+//     const order = await Order.findOne({ orderId, userId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+    
+//     // Check availability logic (you can integrate with external API)
+//     order.address.isAvailable = true;
+//     order.status = 'payment_pending';
+//     order.updatedAt = new Date();
+    
+//     await order.save();
+    
+//     // For now, we'll assume everything is available
+//     res.json({ 
+//       message: 'Availability checked', 
+//       isAvailable: true,
+//       order 
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+// // Update product/item status (public access)
+// router.put('/:orderId/item/:itemId/status', async (req, res) => {
+//   try {
+//     const { orderId, itemId } = req.params;
+//     const { status } = req.body;
+
+//     const order = await Order.findOne({ orderId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+
+//     const itemIndex = order.items.findIndex(
+//       item => item._id.toString() === itemId
+//     );
+//     if (itemIndex === -1) {
+//       return res.status(404).json({ message: 'Item not found' });
+//     }
+
+//     order.items[itemIndex].status = status;
+
+//     // If all items available → move to payment_pending
+//     const allAvailable = order.items.every(
+//       item => item.status === 'available'
+//     );
+//     if (allAvailable) {
+//       order.status = 'payment_pending';
+//     }
+
+//     order.updatedAt = new Date();
+//     await order.save();
+
+//     res.json({ message: 'Status updated', order });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+
+
+
+// // Update order status (public access)
+// router.put('/:orderId/status', async (req, res) => {
+//   try {
+//     const { orderId } = req.params;
+//     const { status } = req.body;
+
+//     const order = await Order.findOne({ orderId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+
+//     order.status = status;
+//     order.updatedAt = new Date();
+//     await order.save();
+
+//     res.json({ message: 'Order status updated', order });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+
+// // Save payment details
+// router.post('/:orderId/payment', authMiddleware, async (req, res) => {
+//   try {
+//     const userId = req.auth.userId || req.auth.memberId;
+//     const { orderId } = req.params;
+//     const paymentData = req.body;
+    
+//     const order = await Order.findOne({ orderId, userId });
+//     if (!order) return res.status(404).json({ message: 'Order not found' });
+    
+//     order.payment = {
+//       ...paymentData,
+//       paymentDate: new Date()
+//     };
+//     order.status = 'payment_done';
+//     order.updatedAt = new Date();
+    
+//     await order.save();
+//     res.json({ message: 'Payment saved', order });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
+// module.exports = router;
+
+
+
+//2nd updated 
+
+
+
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
 const Order = require('../models/Order');
 
-// Get user's orders
-router.get('/myorders', authMiddleware, async (req, res) => {
+/**
+ * Get all orders (public)
+ */
+router.get('/myorders', async (req, res) => {
   try {
-    const userId = req.auth.userId || req.auth.memberId;
-    const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+    const orders = await Order.find().sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Get order by ID
-router.get('/:orderId', authMiddleware, async (req, res) => {
+/**
+ * Get order by orderId (public)
+ */
+router.get('/:orderId', async (req, res) => {
   try {
-    const userId = req.auth.userId || req.auth.memberId;
     const { orderId } = req.params;
-    
-    const order = await Order.findOne({ orderId, userId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Save address
-router.put('/:orderId/address', authMiddleware, async (req, res) => {
+/**
+ * Save address (public)
+ */
+router.put('/:orderId/address', async (req, res) => {
   try {
-    const userId = req.auth.userId || req.auth.memberId;
     const { orderId } = req.params;
     const addressData = req.body;
-    
-    const order = await Order.findOne({ orderId, userId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     order.address = addressData;
     order.status = 'availability_check';
     order.updatedAt = new Date();
-    
+
     await order.save();
     res.json({ message: 'Address saved', order });
   } catch (error) {
@@ -218,55 +393,58 @@ router.put('/:orderId/address', authMiddleware, async (req, res) => {
   }
 });
 
-// Check availability
-router.post('/:orderId/check-availability', authMiddleware, async (req, res) => {
+/**
+ * Check availability (public)
+ */
+router.post('/:orderId/check-availability', async (req, res) => {
   try {
-    const userId = req.auth.userId || req.auth.memberId;
     const { orderId } = req.params;
-    
-    const order = await Order.findOne({ orderId, userId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    
-    // Check availability logic (you can integrate with external API)
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     order.address.isAvailable = true;
     order.status = 'payment_pending';
     order.updatedAt = new Date();
-    
+
     await order.save();
-    
-    // For now, we'll assume everything is available
-    res.json({ 
-      message: 'Availability checked', 
+
+    res.json({
+      message: 'Availability checked',
       isAvailable: true,
-      order 
+      order
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Update product/item status (public access)
+/**
+ * ✅ UPDATE ITEM STATUS (WORKS FROM ANY WEBSITE)
+ */
 router.put('/:orderId/item/:itemId/status', async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
     const { status } = req.body;
 
     const order = await Order.findOne({ orderId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
 
-    const itemIndex = order.items.findIndex(
-      item => item._id.toString() === itemId
-    );
-    if (itemIndex === -1) {
+    const item = order.items.id(itemId);
+    if (!item) {
       return res.status(404).json({ message: 'Item not found' });
     }
 
-    order.items[itemIndex].status = status;
+    item.status = status;
 
-    // If all items available → move to payment_pending
     const allAvailable = order.items.every(
-      item => item.status === 'available'
+      i => i.status === 'available'
     );
+
     if (allAvailable) {
       order.status = 'payment_pending';
     }
@@ -274,52 +452,62 @@ router.put('/:orderId/item/:itemId/status', async (req, res) => {
     order.updatedAt = new Date();
     await order.save();
 
-    res.json({ message: 'Status updated', order });
+    res.json({
+      message: 'Item status updated successfully',
+      order
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-
-
-
-// Update order status (public access)
+/**
+ * ✅ UPDATE ORDER STATUS (WORKS FROM ANY WEBSITE)
+ */
 router.put('/:orderId/status', async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
 
     const order = await Order.findOne({ orderId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
 
     order.status = status;
     order.updatedAt = new Date();
     await order.save();
 
-    res.json({ message: 'Order status updated', order });
+    res.json({
+      message: 'Order status updated successfully',
+      order
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-
-// Save payment details
-router.post('/:orderId/payment', authMiddleware, async (req, res) => {
+/**
+ * Save payment (public)
+ */
+router.post('/:orderId/payment', async (req, res) => {
   try {
-    const userId = req.auth.userId || req.auth.memberId;
     const { orderId } = req.params;
     const paymentData = req.body;
-    
-    const order = await Order.findOne({ orderId, userId });
-    if (!order) return res.status(404).json({ message: 'Order not found' });
-    
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
     order.payment = {
       ...paymentData,
       paymentDate: new Date()
     };
+
     order.status = 'payment_done';
     order.updatedAt = new Date();
-    
+
     await order.save();
     res.json({ message: 'Payment saved', order });
   } catch (error) {

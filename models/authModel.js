@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+
 /* ================= MEMBER ================= */
 const memberSchema = new mongoose.Schema({
   memberId: { type: String, unique: true, required: true },
@@ -18,6 +19,12 @@ const memberSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String },
   businessName: { type: String },
+  
+  // Stats (add these fields)
+  totalBasketItems: { type: Number, default: 0 },
+  pendingReviews: { type: Number, default: 0 },
+  totalOrders: { type: Number, default: 0 },
+  
   createdAt: { type: Date, default: Date.now }
 });
 
