@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const basketRoutes = require('./routes/BasketRoutes')
+const brandRoutes = require('./routes/brandRoutes');
 
 
 const app = express();
@@ -22,11 +23,11 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-app.use(history());
-app.use(express.static(path.join(__dirname, "dist")));
-app.get("*", (req, res) => {
- res.sendFile(path.join(__dirname, "dist", "index.html"));
- });
+// app.use(history());
+// app.use(express.static(path.join(__dirname, "dist")));
+// app.get("*", (req, res) => {
+//  res.sendFile(path.join(__dirname, "dist", "index.html"));
+//  });
 
 // ================= Database Connection =================
 const MONGO_URI =
@@ -52,6 +53,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payment', paymentRoutes);
 
 app.use('/api', basketRoutes);
+app.use('/api', brandRoutes);
 
 // ================= Basic Test Route =================
 app.get("/", (req, res) => {
