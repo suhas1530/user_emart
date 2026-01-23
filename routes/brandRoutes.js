@@ -1,26 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-// Mock Brands Data for Development
-// This ensures the frontend has something to load instead of failing
-const mockBrands = [
-  {
-    _id: "brand1",
-    brandName: "Local Test Brand",
-    products: [
-      {
-        _id: "prod1",
-        productName: "Test Product 1",
-        images: ["image1.jpg"],
-        variants: [
-            { finalPrice: 100 }
-        ],
-        categoryName: "Test Category",
-        subCategoryName: "Test SubCat"
-      }
-    ]
-  }
-];
 
 router.get("/brands", (req, res) => {
   try {
