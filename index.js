@@ -17,17 +17,38 @@ const brandRoutes = require('./routes/brandRoutes');
 const app = express();
 
 // ================= Middleware =================
-app.use(cors());
+// Configure CORS with specific options for production
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow all origins for uploads endpoint
+    callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  maxAge: 86400
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
+// Custom middleware to add CORS headers for static files
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Max-Age', '86400');
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
-
+// Serve static files with proper CORS headers
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use(
-  '/uploads',
-  express.static(path.join(process.cwd(), 'uploads'))
-);
 
 
 // app.use(history());
