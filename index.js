@@ -51,11 +51,11 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-// app.use(history());
-// app.use(express.static(path.join(__dirname, "dist")));
-// app.get("*", (req, res) => {
-//  res.sendFile(path.join(__dirname, "dist", "index.html"));
-//  });
+app.use(history());
+app.use(express.static(path.join(__dirname, "dist")));
+app.get("*", (req, res) => {
+res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 // ================= Database Connection =================
 const MONGO_URI =
